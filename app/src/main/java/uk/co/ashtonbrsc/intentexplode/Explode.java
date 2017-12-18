@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import de.k3b.android.widget.HistoryEditText;
 import uk.co.ashtonbrsc.android.intentintercept.R;
 
 //TODO add icon -which icon - app icons???
@@ -117,10 +118,14 @@ public class Explode extends AppCompatActivity {
     }
 
 	private ShareActionProvider shareActionProvider; // api-14 or compat
+	
 	private EditText action;
 	private EditText data;
 	private EditText type;
     private EditText uri;
+	
+	private HistoryEditText mHistory = null;
+
 	private TextView categoriesHeader;
 	private LinearLayout categoriesLayout;
 	private LinearLayout flagsLayout;
@@ -217,6 +222,9 @@ public class Explode extends AppCompatActivity {
         final boolean isVisible = savedInstanceState != null
                 && savedInstanceState.getBoolean(INTENT_EDITED);
         showInitialIntent(isVisible);
+
+		if (mHistory != null) mHistory.saveHistory();
+
 	}
 
     private void rememberIntent(Intent original) {
@@ -511,6 +519,19 @@ public class Explode extends AppCompatActivity {
 		data = (EditText) findViewById(R.id.data_edit);
 		type = (EditText) findViewById(R.id.type_edit);
         uri = (EditText) findViewById(R.id.uri_edit);
+
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+			mHistory = new HistoryEditText(this, new int[]{
+					R.id.cmd_edit_history,
+					R.id.cmd_data_history,
+					R.id.cmd_type_history,
+					R.id.cmd_uri_history},
+					action,
+					data,
+					type,
+					uri);
+		}
+
 		categoriesHeader = (TextView) findViewById(R.id.intent_categories_header);
 		categoriesLayout = (LinearLayout) findViewById(R.id.intent_categories_layout);
 		flagsLayout = (LinearLayout) findViewById(R.id.intent_flags_layout);
@@ -796,6 +817,7 @@ public class Explode extends AppCompatActivity {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean(INTENT_EDITED,
 				resetIntentButton.getVisibility() == View.VISIBLE);
+		if (mHistory != null) mHistory.saveHistory();
 	}
 
     // support for onActivityResult
